@@ -1,8 +1,13 @@
-"""
+r"""
 commands_restart - 既存プロジェクトの再開支援ツール
 
 Created: 2026-02-15
-Updated: 2026-02-15 17:10
+Updated: 2026-02-15 18:30
+
+【環境依存情報】2026年2月時点のPC環境に依存
+PC引っ越し時の要修正箇所:
+- VSCODE_PATH: VS Codeのインストールパス（現在は C:\Users\14506928\... に固定）
+  → 新PC環境に合わせてフルパスを修正してください
 """
 
 import argparse
@@ -11,6 +16,9 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+
+# 【環境依存】PC引っ越し時にこのパスを新環境に合わせて修正
+VSCODE_PATH = r"C:\Users\14506928\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd"
 
 
 def get_git_info(project_path: Path) -> dict:
@@ -166,24 +174,41 @@ def interactive_mode():
 
     project_path = Path(folder)
 
+    # プロジェクト情報を収集
+    git_info = get_git_info(project_path)
+    env_info = get_env_info(project_path)
+    claude_md_content = read_claude_md(project_path)
+
     # VSCodeで開く
     try:
-        subprocess.run(["code", str(project_path)], check=True)
-
-        # 情報出力
-        print(json.dumps({
-            "success": True,
-            "message": f"VSCodeでプロジェクトを開きました: {project_path.name}",
-            "project_path": str(project_path),
-            "venv_exists": (project_path / ".venv").exists()
-        }, ensure_ascii=False, indent=2))
-
+        subprocess.run([VSCODE_PATH, str(project_path)], check=True)
+        vscode_opened = True
+        vscode_error = None
+    except FileNotFoundError:
+        vscode_opened = False
+        vscode_error = f"VS Codeが見つかりません: {VSCODE_PATH}"
     except subprocess.CalledProcessError as e:
-        print(json.dumps({
-            "success": False,
-            "error": f"VSCodeの起動に失敗しました: {e}"
-        }, ensure_ascii=False, indent=2))
-        sys.exit(1)
+        vscode_opened = False
+        vscode_error = f"VS Code起動失敗: {e}"
+    except Exception as e:
+        vscode_opened = False
+        vscode_error = f"予期しないエラー: {e}"
+
+    # 情報出力
+    output = {
+        "success": True,
+        "project_path": str(project_path),
+        "project_name": project_path.name,
+        "git": git_info,
+        "environment": env_info,
+        "claude_md": claude_md_content,
+        "vscode_opened": vscode_opened
+    }
+
+    if vscode_error:
+        output["vscode_error"] = vscode_error
+
+    print(json.dumps(output, ensure_ascii=False, indent=2))
 
 
 def main():

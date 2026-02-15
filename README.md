@@ -74,6 +74,30 @@ python main.py --path "C:/Users/14506928/Projects/my_project"
 
 特別なセットアップは不要です（標準ライブラリのみ使用）。
 
+## ⚠️ 環境依存について
+
+**このツールは 2026年2月時点のPC環境に依存しています。**
+
+### PC引っ越し時の修正が必要な箇所
+
+**ファイル**: `main.py`
+**修正箇所**: 冒頭の `VSCODE_PATH` 定数
+
+```python
+# 【環境依存】PC引っ越し時にこのパスを新環境に合わせて修正
+VSCODE_PATH = r"C:\Users\14506928\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd"
+```
+
+**修正方法**:
+1. 新PC環境で PowerShell を開く
+2. `where.exe code` を実行してVS Codeのパスを確認
+3. `main.py` の `VSCODE_PATH` を新しいパスに書き換える
+
+例:
+```python
+VSCODE_PATH = r"C:\Users\新ユーザー名\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd"
+```
+
 ## バージョン履歴
 
 ### v0.1.0 (2026-02-15)
