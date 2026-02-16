@@ -14,13 +14,13 @@ def setup_logger(name: str = __name__) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
-    # logsフォルダがなければ作成
-    os.makedirs("logs", exist_ok=True)
+    # _logsフォルダがなければ作成
+    os.makedirs("_logs", exist_ok=True)
 
     # ファイルハンドラ（タイムスタンプ付きファイル名）
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     file_handler = logging.FileHandler(
-        f"logs/app_{timestamp}.log", encoding="utf-8"
+        f"_logs/app_{timestamp}.log", encoding="utf-8"
     )
     file_handler.setLevel(logging.DEBUG)
 
