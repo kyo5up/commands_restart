@@ -5,11 +5,12 @@
       "name": "Python: main.py (venv)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${file}",
+      "program": "${fileDirname}/main.py",
       "console": "integratedTerminal",
-      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "python": "${fileDirname}/.venv/Scripts/python.exe",
       "args": [],
-      "cwd": "${workspaceFolder}"
+      "cwd": "${fileDirname}",
+      "justMyCode": true
     }
   ]
 }
