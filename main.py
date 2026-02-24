@@ -99,6 +99,55 @@ def ensure_launch_json(project_path: Path) -> str:
     return "新規作成"
 
 
+GITIGNORE_ENTRIES = [
+    "# Python",
+    ".venv/",
+    "venv/",
+    "__pycache__/",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    "*.egg-info/",
+    "dist/",
+    "build/",
+    "# 環境・シークレット",
+    ".env",
+    "# ログ・出力",
+    "logs/",
+    "_logs/",
+    "*.log",
+    "output/",
+    "input/",
+    "# 一時ファイル",
+    "*.tmp",
+    "*.bak",
+    "# OS",
+    ".DS_Store",
+    "Thumbs.db",
+    "desktop.ini",
+    "# IDE・ツール",
+    ".claude/",
+]
+
+
+def ensure_gitignore(project_path: Path) -> str:
+    """.gitignoreに不足項目があれば追記する。結果メッセージを返す"""
+    gi = project_path / ".gitignore"
+    if not gi.exists():
+        gi.write_text("\n".join(GITIGNORE_ENTRIES) + "\n", encoding="utf-8")
+        return "新規作成"
+
+    current = gi.read_text(encoding="utf-8")
+    existing = set(line.strip() for line in current.splitlines())
+    missing = [e for e in GITIGNORE_ENTRIES if e not in existing and not e.startswith("#")]
+
+    if not missing:
+        return "既存（不足なし）"
+
+    gi.write_text(current.rstrip() + "\n\n" + "\n".join(missing) + "\n", encoding="utf-8")
+    return f"追記: {', '.join(missing)}"
+
+
 def ensure_develop_branch(project_path: Path) -> str:
     """mainブランチにいる場合はdevelopに切り替える。結果メッセージを返す"""
     result = subprocess.run(
@@ -222,6 +271,7 @@ def build_report(project_name: str, setup: dict, git_info: dict) -> str:
         "venv":        ".venv",
         "run_bat":     "run.bat",
         "launch_json": ".vscode/launch.json",
+        "gitignore":   ".gitignore",
         "branch":      "ブランチ",
     }
     lines.append(_top())
@@ -283,6 +333,7 @@ def info_mode(project_path: str) -> None:
         setup_results["venv"]        = ensure_venv(path)
         setup_results["run_bat"]     = ensure_run_bat(path)
         setup_results["launch_json"] = ensure_launch_json(path)
+        setup_results["gitignore"]   = ensure_gitignore(path)
         setup_results["branch"]      = ensure_develop_branch(path)
 
     # 情報収集
@@ -347,6 +398,7 @@ def interactive_mode() -> None:
         setup_results["venv"]        = ensure_venv(project_path)
         setup_results["run_bat"]     = ensure_run_bat(project_path)
         setup_results["launch_json"] = ensure_launch_json(project_path)
+        setup_results["gitignore"]   = ensure_gitignore(project_path)
         setup_results["branch"]      = ensure_develop_branch(project_path)
 
     git_info = get_git_info(project_path)
