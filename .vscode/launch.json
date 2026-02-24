@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: main.py (venv)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${fileDirname}/main.py",
+      "console": "integratedTerminal",
+      "python": "${fileDirname}/.venv/Scripts/python.exe",
+      "args": [],
+      "cwd": "${fileDirname}",
+      "justMyCode": true
+    }
+  ]
+}
