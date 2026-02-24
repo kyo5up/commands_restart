@@ -5,3 +5,23 @@ __pycache__/
 logs/
 *.log
 .DS_Store
+
+# Python
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+venv/
+# ログ・出力
+_logs/
+output/
+input/
+# 一時ファイル
+*.tmp
+*.bak
+# OS
+Thumbs.db
+desktop.ini
+# IDE・ツール
+.claude/
