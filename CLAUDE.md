@@ -2,7 +2,7 @@
 
 > **このファイルは「条例」です。憲法ではありません。**
 > - 条例 = このファイル（`C:/Users/14506928/Projects/00_assistants/commands_restart/CLAUDE.md`）← プロジェクト固有ルール
-> - 憲法 = `C:/Users/14506928/Projects/CLAUDE.md` ← 全プロジェクト共通ルール
+> - 憲法 = `C:/Users/14506928/.claude/CLAUDE.md` ← 全プロジェクト共通ルール
 > - 憲法が最優先。条例は憲法を継承しつつ、このプロジェクト固有のルールを追記する。
 
 
