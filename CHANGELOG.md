@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-03-24
+
+### Added
+- `get_project_type()` を追加: `CLAUDE.md` から `project_type` を読み取る
+
+### Changed
+- `project_type: web` の場合 `main.py` / `logger_config.py` を生成しないよう分岐
+- README.md に `project_type` による分岐の説明を追記
+
 ## [v0.2.0] - 2026-03-23
 
 ### Added
