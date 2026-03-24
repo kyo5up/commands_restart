@@ -2,7 +2,7 @@ r"""
 commands_restart - 既存プロジェクトの再開支援ツール
 
 Created: 2026-02-15
-Updated: 2026-03-23 19:31
+Updated: 2026-03-24 10:38
 
 【環境依存情報】2026年2月時点のPC環境に依存
 PC引っ越し時の要修正箇所:
@@ -188,6 +188,18 @@ def ensure_readme(project_path: Path) -> str:
         return "既存"
     f.write_text(render_template("README.md", project_path.name), encoding="utf-8")
     return "新規作成"
+
+
+def get_project_type(project_path: Path) -> str:
+    """CLAUDE.mdからproject_typeを読み取る。未設定の場合は'python'を返す"""
+    claude_md = project_path / "CLAUDE.md"
+    if not claude_md.exists():
+        return "python"
+    for line in claude_md.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line.startswith("project_type:"):
+            return line.split(":", 1)[1].strip()
+    return "python"
 
 
 def ensure_main_py(project_path: Path) -> str:
@@ -489,8 +501,9 @@ def info_mode(project_path: str) -> None:
         setup_results["env"]           = ensure_env(path)
         setup_results["requirements"]  = ensure_requirements(path)
         setup_results["readme"]        = ensure_readme(path)
-        setup_results["main_py"]       = ensure_main_py(path)
-        setup_results["logger_config"] = ensure_logger_config(path)
+        if get_project_type(path) != "web":
+            setup_results["main_py"]       = ensure_main_py(path)
+            setup_results["logger_config"] = ensure_logger_config(path)
         setup_results["claude_md"]     = ensure_claude_md(path)
         setup_results["changelog"]     = ensure_changelog(path)
         setup_results["git_status"]    = ensure_git_status(path)
@@ -566,8 +579,9 @@ def interactive_mode() -> None:
         setup_results["env"]           = ensure_env(project_path)
         setup_results["requirements"]  = ensure_requirements(project_path)
         setup_results["readme"]        = ensure_readme(project_path)
-        setup_results["main_py"]       = ensure_main_py(project_path)
-        setup_results["logger_config"] = ensure_logger_config(project_path)
+        if get_project_type(project_path) != "web":
+            setup_results["main_py"]       = ensure_main_py(project_path)
+            setup_results["logger_config"] = ensure_logger_config(project_path)
         setup_results["claude_md"]     = ensure_claude_md(project_path)
         setup_results["changelog"]     = ensure_changelog(project_path)
         setup_results["git_status"]    = ensure_git_status(project_path)
