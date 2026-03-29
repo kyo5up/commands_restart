@@ -2,7 +2,7 @@ r"""
 commands_restart - 既存プロジェクトの再開支援ツール
 
 Created: 2026-02-15
-Updated: 2026-03-24 10:38
+Updated: 2026-03-29 17:05
 
 【環境依存情報】2026年2月時点のPC環境に依存
 PC引っ越し時の要修正箇所:
@@ -190,16 +190,38 @@ def ensure_readme(project_path: Path) -> str:
     return "新規作成"
 
 
-def get_project_type(project_path: Path) -> str:
-    """CLAUDE.mdからproject_typeを読み取る。未設定の場合は'python'を返す"""
+def get_project_types(project_path: Path) -> list[str]:
+    """README.mdのフロントマターからproject_typeを読み取り、リストで返す。
+    フロントマターがない場合はCLAUDE.mdにフォールバック。
+    未設定の場合は空リストを返す。
+    """
+    # README.mdのフロントマターから読む
+    readme = project_path / "README.md"
+    if readme.exists():
+        content = readme.read_text(encoding="utf-8")
+        lines = content.splitlines()
+        if lines and lines[0].strip() == "---":
+            for line in lines[1:]:
+                if line.strip() == "---":
+                    break
+                line = line.strip()
+                if line.startswith("project_type:"):
+                    value = line.split(":", 1)[1].strip()
+                    if value.startswith("["):
+                        # [web, python] 形式
+                        return [v.strip() for v in value.strip("[]").split(",")]
+                    else:
+                        return [value]
+
+    # フォールバック: CLAUDE.mdから読む
     claude_md = project_path / "CLAUDE.md"
-    if not claude_md.exists():
-        return "python"
-    for line in claude_md.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line.startswith("project_type:"):
-            return line.split(":", 1)[1].strip()
-    return "python"
+    if claude_md.exists():
+        for line in claude_md.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith("project_type:"):
+                return [line.split(":", 1)[1].strip()]
+
+    return []
 
 
 def ensure_main_py(project_path: Path) -> str:
@@ -501,7 +523,8 @@ def info_mode(project_path: str) -> None:
         setup_results["env"]           = ensure_env(path)
         setup_results["requirements"]  = ensure_requirements(path)
         setup_results["readme"]        = ensure_readme(path)
-        if get_project_type(path) != "web":
+        project_types = get_project_types(path)
+        if "web" not in project_types and "python" in project_types:
             setup_results["main_py"]       = ensure_main_py(path)
             setup_results["logger_config"] = ensure_logger_config(path)
         setup_results["claude_md"]     = ensure_claude_md(path)
@@ -579,7 +602,8 @@ def interactive_mode() -> None:
         setup_results["env"]           = ensure_env(project_path)
         setup_results["requirements"]  = ensure_requirements(project_path)
         setup_results["readme"]        = ensure_readme(project_path)
-        if get_project_type(project_path) != "web":
+        project_types = get_project_types(project_path)
+        if "web" not in project_types and "python" in project_types:
             setup_results["main_py"]       = ensure_main_py(project_path)
             setup_results["logger_config"] = ensure_logger_config(project_path)
         setup_results["claude_md"]     = ensure_claude_md(project_path)

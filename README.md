@@ -1,18 +1,25 @@
+---
+project_type: [script, python]
+status: active
+tags: []
+created: 2026-02-15T00:00:00
+updated: 2026-03-29T17:06:00
+---
+
 # commands_restart
 
-Created: 2026-02-15
-Updated: 2026-03-24 10:39
-
-## 概要
 `/restart` コマンドの処理をPythonで実行し、既存プロジェクトの再開を支援する。
 
 ## 目的
+
 既存プロジェクトの環境整備・状態確認・書類チェックをPythonに委譲し、Claude側のトークン消費を最小化する。
 
 ## インストール方法
+
 外部パッケージ不要（Python標準ライブラリのみ使用）。
 
 ## 使い方
+
 ```bash
 # CLIモード（/restart コマンドから自動呼び出し）
 python main.py --path "C:/Users/14506928/Projects/my-project"
@@ -22,6 +29,7 @@ python main.py
 ```
 
 ## ディレクトリ構成・ファイル役割説明
+
 ```
 commands_restart/
 ├── main.py             # メインスクリプト（CLI/GUIモード・環境整備・書類チェックの実体）
@@ -43,7 +51,8 @@ commands_restart/
 ## スクリプトの動作・引数の概要
 
 ### 動作（CLIモード）
-1. 対象プロジェクトの `CLAUDE.md` から `project_type` を読み取る
+
+1. 対象プロジェクトの `README.md` フロントマターから `project_type` を読み取る（フォールバック: `CLAUDE.md`）
 2. `project_type` に応じて環境整備の内容を分岐する（詳細は下記）
 3. `/start` で生成される全ファイルの存在チェック・不足分を自動作成
 4. Git情報（ブランチ・未コミット変更・リモートURL）を収集
@@ -53,19 +62,21 @@ commands_restart/
 
 ### project_type による分岐
 
-対象プロジェクトの `CLAUDE.md` に以下の形式で記載する:
+対象プロジェクトの `README.md` フロントマターに以下の形式で記載する（複数指定可）:
 
-```
-## プロジェクト種別
-project_type: web
+```yaml
+---
+project_type: [web]
+---
 ```
 
-| project_type | `main.py` | `logger_config.py` |
+| 条件 | `main.py` | `logger_config.py` |
 |---|---|---|
-| `python`（または未設定） | 生成する | 生成する |
-| `web` | 生成しない | 生成しない |
+| `web` を含む | 生成しない | 生成しない |
+| `web` を含まず `python` を含む | 生成する | 生成する |
+| どちらも含まない | 生成しない | 生成しない |
 
-種別の詳細・追加候補は書庫（`~/.claude/CLAUDE.ref.md`）の「プロジェクト種別」セクションを参照。
+種別の詳細・追加候補は書庫（`~/.claude/CLAUDE.ref.md`）の「プロジェクト種別・ステータス」セクションを参照。
 
 ### 引数
 
@@ -74,4 +85,5 @@ project_type: web
 | `--path` | str | なし（GUIモード） | 対象プロジェクトのパス |
 
 ## ライセンス
+
 Private
