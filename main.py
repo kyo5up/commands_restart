@@ -2,7 +2,7 @@ r"""
 commands_restart - 既存プロジェクトの再開支援ツール
 
 Created: 2026-02-15
-Updated: 2026-03-29 17:05
+Updated: 2026-04-07 16:19
 
 【環境依存情報】2026年2月時点のPC環境に依存
 PC引っ越し時の要修正箇所:
@@ -489,9 +489,12 @@ def build_report(project_name: str, setup: dict, git_info: dict) -> str:
     return "\n".join(lines)
 
 
-def save_log(project_path: Path, report: str) -> Path:
-    """_logs/ にログファイルを保存する"""
-    logs_dir = project_path / "_logs"
+def save_log(report: str) -> Path:
+    """restart側の _logs/ にログファイルを保存する
+
+    理由：restart Pythonの正常動作検証が目的であり、ツール側に記録するのが自然
+    """
+    logs_dir = Path(__file__).parent / "_logs"
     logs_dir.mkdir(exist_ok=True)
     log_path = logs_dir / f"restart_{TIMESTAMP}.log"
     log_path.write_text(report, encoding="utf-8")
@@ -541,7 +544,7 @@ def info_mode(project_path: str) -> None:
     # 表形式レポートを生成・表示・ログ保存
     report = build_report(path.name, setup_results, git_info)
     print(report)
-    log_path = save_log(path, report)
+    log_path = save_log(report)
     print(f"\nログ保存: {log_path}")
 
     # ClaudeへのJSON出力（CLAUDE.md読み取り用）
@@ -618,7 +621,7 @@ def interactive_mode() -> None:
     # 表形式レポート・ログ保存
     report = build_report(project_path.name, setup_results, git_info)
     print(report)
-    save_log(project_path, report)
+    save_log(report)
 
     # VSCodeで開く
     try:

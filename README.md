@@ -3,7 +3,7 @@ project_type: [script, python]
 status: active
 tags: []
 created: 2026-02-15T00:00:00
-updated: 2026-03-29T17:06:00
+updated: 2026-04-07T16:00:00
 ---
 
 # commands_restart
@@ -33,12 +33,12 @@ python main.py
 ```
 commands_restart/
 ├── main.py             # メインスクリプト（CLI/GUIモード・環境整備・書類チェックの実体）
-├── logger_config.py    # ログ設定モジュール
-├── requirements.txt    # 依存パッケージ一覧（標準ライブラリのみのため空）
+├── requirements.txt    # 依存パッケージ一覧（標準ライブラリのみ使用）
 ├── run.bat             # GUIモード起動用バッチ
 ├── README.md           # このファイル
 ├── CHANGELOG.md        # バージョン変更履歴
 ├── CLAUDE.md           # プロジェクト固有ルール（条例）
+├── .vscode/launch.json # VS Codeデバッグ設定
 └── _logs/              # 実行ログ（gitignore対象）
 ```
 
@@ -58,7 +58,7 @@ commands_restart/
 4. Git情報（ブランチ・未コミット変更・リモートURL）を収集
 5. 書類（README.md・CHANGELOG.md）のセクション見出しを抽出
 6. テンプレートと比較してClaudeに差異を報告するためJSONを出力
-7. 表形式レポートを標準出力に表示・`_logs/` にログ保存
+7. 表形式レポートを標準出力に表示・`_logs/` にログ保存（restart側の _logs/）
 
 ### project_type による分岐
 
