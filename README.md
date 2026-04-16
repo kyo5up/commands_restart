@@ -1,9 +1,9 @@
 ---
-project_type: [script, python]
+project_type: [script]
 status: active
 tags: []
 created: 2026-02-15T00:00:00
-updated: 2026-04-07T16:00:00
+updated: 2026-04-16T00:00:00
 ---
 
 # commands_restart
@@ -32,14 +32,13 @@ python main.py
 
 ```
 commands_restart/
-├── main.py             # メインスクリプト（CLI/GUIモード・環境整備・書類チェックの実体）
-├── requirements.txt    # 依存パッケージ一覧（標準ライブラリのみ使用）
-├── run.bat             # GUIモード起動用バッチ
-├── README.md           # このファイル
+├── _logs/              # 実行ログ（gitignore対象）
 ├── CHANGELOG.md        # バージョン変更履歴
 ├── CLAUDE.md           # プロジェクト固有ルール（条例）
-├── .vscode/launch.json # VS Codeデバッグ設定
-└── _logs/              # 実行ログ（gitignore対象）
+├── main.py             # メインスクリプト（CLI/GUIモード・環境整備・書類チェックの実体）
+├── README.md           # このファイル
+├── requirements.txt    # 依存パッケージ一覧（標準ライブラリのみ使用）
+└── run.bat             # GUIモード起動用バッチ
 ```
 
 ## 設定ファイルの場所と用途
@@ -70,11 +69,13 @@ project_type: [web]
 ---
 ```
 
-| 条件 | `main.py` | `logger_config.py` |
+| primary_type | `.venv` 等 | `main.py` / `logger_config.py` |
 |---|---|---|
-| `web` を含む | 生成しない | 生成しない |
-| `web` を含まず `python` を含む | 生成する | 生成する |
-| どちらも含まない | 生成しない | 生成しない |
+| `script`（またはその他） | 生成する | 生成する |
+| `web` | 生成する | 生成しない |
+| `slide` | 生成しない | 生成しない |
+
+※ `.venv` 等 = `.venv` / `run.bat` / `.vscode/` / `.env` / `requirements.txt` / `CHANGELOG.md` / `_logs/`
 
 種別の詳細・追加候補は書庫（`~/.claude/CLAUDE.ref.md`）の「プロジェクト種別・ステータス」セクションを参照。
 

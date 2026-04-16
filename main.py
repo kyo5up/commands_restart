@@ -2,7 +2,7 @@ r"""
 commands_restart - 既存プロジェクトの再開支援ツール
 
 Created: 2026-02-15
-Updated: 2026-04-07 16:19
+Updated: 2026-04-16 12:11
 
 【環境依存情報】2026年2月時点のPC環境に依存
 PC引っ越し時の要修正箇所:
@@ -181,12 +181,16 @@ def ensure_requirements(project_path: Path) -> str:
     return "新規作成"
 
 
-def ensure_readme(project_path: Path) -> str:
+def ensure_readme(project_path: Path, project_type: str = "script") -> str:
     """README.mdがなければ作成する。結果メッセージを返す"""
     f = project_path / "README.md"
     if f.exists():
         return "既存"
-    f.write_text(render_template("README.md", project_path.name), encoding="utf-8")
+    template_name = f"README_{project_type}.md"
+    # テンプレートが存在しない場合はscriptにフォールバック
+    if not (TEMPLATES_DIR / template_name).exists():
+        template_name = "README_script.md"
+    f.write_text(render_template(template_name, project_path.name), encoding="utf-8")
     return "新規作成"
 
 
@@ -411,9 +415,12 @@ def get_doc_sections(project_path: Path) -> dict:
     }
 
 
-def get_template_sections() -> dict:
+def get_template_sections(project_type: str = "script") -> dict:
     """テンプレートファイルのセクション見出しを収集する"""
-    targets = ["README.md", "CHANGELOG.md"]
+    template_name = f"README_{project_type}.md"
+    if not (TEMPLATES_DIR / template_name).exists():
+        template_name = "README_script.md"
+    targets = [template_name, "CHANGELOG.md"]
     return {
         name: extract_sections(TEMPLATES_DIR / name)
         for name in targets
@@ -518,28 +525,37 @@ def info_mode(project_path: str) -> None:
 
     # 環境整備
     setup_results = {}
+    primary_type = "script"
     if (path / ".git").exists():
-        setup_results["venv"]          = ensure_venv(path)
-        setup_results["run_bat"]       = ensure_run_bat(path)
-        setup_results["launch_json"]   = ensure_launch_json(path)
-        setup_results["gitignore"]     = ensure_gitignore(path)
-        setup_results["env"]           = ensure_env(path)
-        setup_results["requirements"]  = ensure_requirements(path)
-        setup_results["readme"]        = ensure_readme(path)
         project_types = get_project_types(path)
-        if "web" not in project_types and "python" in project_types:
+        primary_type = project_types[0] if project_types else "script"
+        is_slide = primary_type == "slide"
+        is_script = primary_type not in ("web", "slide")
+        is_python = "python" in project_types or (is_script and len(project_types) == 1)
+
+        setup_results["readme"]        = ensure_readme(path, primary_type)
+        setup_results["claude_md"]     = ensure_claude_md(path)
+        setup_results["git_status"]    = ensure_git_status(path)
+        setup_results["gitignore"]     = ensure_gitignore(path)
+
+        if not is_slide:
+            setup_results["venv"]          = ensure_venv(path)
+            setup_results["run_bat"]       = ensure_run_bat(path)
+            setup_results["launch_json"]   = ensure_launch_json(path)
+            setup_results["env"]           = ensure_env(path)
+            setup_results["requirements"]  = ensure_requirements(path)
+            setup_results["changelog"]     = ensure_changelog(path)
+            setup_results["logs_dir"]      = ensure_logs_dir(path)
+
+        if is_script and is_python:
             setup_results["main_py"]       = ensure_main_py(path)
             setup_results["logger_config"] = ensure_logger_config(path)
-        setup_results["claude_md"]     = ensure_claude_md(path)
-        setup_results["changelog"]     = ensure_changelog(path)
-        setup_results["git_status"]    = ensure_git_status(path)
-        setup_results["logs_dir"]      = ensure_logs_dir(path)
 
     # 情報収集
     git_info = get_git_info(path)
     claude_md_content = read_claude_md(path)
     doc_sections = get_doc_sections(path)
-    template_sections = get_template_sections()
+    template_sections = get_template_sections(primary_type)
 
     # 表形式レポートを生成・表示・ログ保存
     report = build_report(path.name, setup_results, git_info)
@@ -598,22 +614,29 @@ def interactive_mode() -> None:
     # 環境整備
     setup_results = {}
     if (project_path / ".git").exists():
-        setup_results["venv"]          = ensure_venv(project_path)
-        setup_results["run_bat"]       = ensure_run_bat(project_path)
-        setup_results["launch_json"]   = ensure_launch_json(project_path)
-        setup_results["gitignore"]     = ensure_gitignore(project_path)
-        setup_results["env"]           = ensure_env(project_path)
-        setup_results["requirements"]  = ensure_requirements(project_path)
-        setup_results["readme"]        = ensure_readme(project_path)
         project_types = get_project_types(project_path)
-        if "web" not in project_types and "python" in project_types:
+        primary_type = project_types[0] if project_types else "script"
+        is_slide = primary_type == "slide"
+        is_script = primary_type not in ("web", "slide")
+        is_python = "python" in project_types or (is_script and len(project_types) == 1)
+
+        setup_results["readme"]        = ensure_readme(project_path, primary_type)
+        setup_results["claude_md"]     = ensure_claude_md(project_path)
+        setup_results["git_status"]    = ensure_git_status(project_path)
+        setup_results["gitignore"]     = ensure_gitignore(project_path)
+
+        if not is_slide:
+            setup_results["venv"]          = ensure_venv(project_path)
+            setup_results["run_bat"]       = ensure_run_bat(project_path)
+            setup_results["launch_json"]   = ensure_launch_json(project_path)
+            setup_results["env"]           = ensure_env(project_path)
+            setup_results["requirements"]  = ensure_requirements(project_path)
+            setup_results["changelog"]     = ensure_changelog(project_path)
+            setup_results["logs_dir"]      = ensure_logs_dir(project_path)
+
+        if is_script and is_python:
             setup_results["main_py"]       = ensure_main_py(project_path)
             setup_results["logger_config"] = ensure_logger_config(project_path)
-        setup_results["claude_md"]     = ensure_claude_md(project_path)
-        setup_results["changelog"]     = ensure_changelog(project_path)
-        setup_results["git_status"]    = ensure_git_status(project_path)
-        setup_results["logs_dir"]      = ensure_logs_dir(project_path)
-        setup_results["branch"]        = ensure_develop_branch(project_path)
 
     git_info = get_git_info(project_path)
     claude_md_content = read_claude_md(project_path)
